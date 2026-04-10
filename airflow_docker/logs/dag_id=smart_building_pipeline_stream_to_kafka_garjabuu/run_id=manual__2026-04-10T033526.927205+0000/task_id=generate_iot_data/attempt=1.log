@@ -1,0 +1,30 @@
+[2026-04-10T03:35:32.341+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: smart_building_pipeline_stream_to_kafka_garjabuu.generate_iot_data manual__2026-04-10T03:35:26.927205+00:00 [queued]>
+[2026-04-10T03:35:32.352+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: smart_building_pipeline_stream_to_kafka_garjabuu.generate_iot_data manual__2026-04-10T03:35:26.927205+00:00 [queued]>
+[2026-04-10T03:35:32.353+0000] {taskinstance.py:2170} INFO - Starting attempt 1 of 3
+[2026-04-10T03:35:32.536+0000] {taskinstance.py:2191} INFO - Executing <Task(PythonOperator): generate_iot_data> on 2026-04-10 03:35:26.927205+00:00
+[2026-04-10T03:35:32.545+0000] {standard_task_runner.py:60} INFO - Started process 264 to run task
+[2026-04-10T03:35:32.549+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'smart_building_pipeline_stream_to_kafka_garjabuu', 'generate_iot_data', 'manual__2026-04-10T03:35:26.927205+00:00', '--job-id', '56', '--raw', '--subdir', 'DAGS_FOLDER/bems_dag.py', '--cfg-path', '/tmp/tmpb881w8aa']
+[2026-04-10T03:35:32.551+0000] {standard_task_runner.py:88} INFO - Job 56: Subtask generate_iot_data
+[2026-04-10T03:35:32.618+0000] {task_command.py:423} INFO - Running <TaskInstance: smart_building_pipeline_stream_to_kafka_garjabuu.generate_iot_data manual__2026-04-10T03:35:26.927205+00:00 [running]> on host 448fbeefe186
+[2026-04-10T03:35:32.692+0000] {taskinstance.py:2480} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='smart-building' AIRFLOW_CTX_DAG_ID='smart_building_pipeline_stream_to_kafka_garjabuu' AIRFLOW_CTX_TASK_ID='generate_iot_data' AIRFLOW_CTX_EXECUTION_DATE='2026-04-10T03:35:26.927205+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-04-10T03:35:26.927205+00:00'
+[2026-04-10T03:35:33.202+0000] {logging_mixin.py:188} INFO - [INFO] Sensor data rows: 13068
+[2026-04-10T03:35:33.208+0000] {logging_mixin.py:188} INFO -                            readingID           timestamp roomID           deviceID  value  deviceType
+738afa68-db30-4efd-8079-2dd3cc3e1d4a 2026-04-01 08:00:00  IT334  IT334_temperature  29.55 temperature
+72a3a58e-52b3-4e1a-94f2-cae22ebc174f 2026-04-01 08:00:00  IT334        IT334_light  32.00       light
+2fe71393-839a-4d14-8bbe-59d8a5150fb4 2026-04-01 08:00:00  IT334        IT334_power   0.40       power
+38dde2d2-4cb6-48e1-802a-df74245dfc56 2026-04-01 08:00:00 Lab103 Lab103_temperature  31.53 temperature
+3fac74a4-17e0-4b6b-a108-95eb286e50a2 2026-04-01 08:00:00 Lab103       Lab103_light  21.00       light
+6abccec6-9c58-42d5-a30e-c679f90ce960 2026-04-01 08:00:00 Lab103       Lab103_power   0.34       power
+5dba4b7f-ae8f-41f9-b5be-556b53c96c3b 2026-04-01 08:00:00  IT305  IT305_temperature  30.27 temperature
+4a42049f-c50d-4b89-bb36-00027fb6b037 2026-04-01 08:00:00  IT305        IT305_light    NaN       light
+d1b1a425-1ab8-49ee-b811-ba71c0d0bf9a 2026-04-01 08:00:00  IT305        IT305_power   0.36       power
+b4484b9b-0bef-4cf5-996b-522cafff4371 2026-04-01 08:00:00 Lab212 Lab212_temperature  30.94 temperature
+d083334d-fa67-4a75-97e6-6f11c7d9fc7e 2026-04-01 08:00:00 Lab212       Lab212_light   4.00       light
+efdd02f4-2c34-49e2-b5b9-c53f3b4c2562 2026-04-01 08:00:00 Lab212       Lab212_power   0.47       power
+6e28fcff-6e1c-4ba3-a3a5-309187078e02 2026-04-01 08:00:00 Lab212 Lab212_temperature  29.42 temperature
+4374e760-7ed8-46db-8373-c25ca80acc17 2026-04-01 08:00:00 Lab212       Lab212_light  35.00       light
+28c593b5-ba36-40f0-b31a-30fb146689e3 2026-04-01 08:00:00 Lab212       Lab212_power   0.25       power
+[2026-04-10T03:35:33.280+0000] {python.py:201} INFO - Done. Returned value was: /tmp/sensor_data.csv
+[2026-04-10T03:35:33.308+0000] {taskinstance.py:1138} INFO - Marking task as SUCCESS. dag_id=smart_building_pipeline_stream_to_kafka_garjabuu, task_id=generate_iot_data, execution_date=20260410T033526, start_date=20260410T033532, end_date=20260410T033533
+[2026-04-10T03:35:33.363+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2026-04-10T03:35:33.387+0000] {taskinstance.py:3280} INFO - 1 downstream tasks scheduled from follow-on schedule check

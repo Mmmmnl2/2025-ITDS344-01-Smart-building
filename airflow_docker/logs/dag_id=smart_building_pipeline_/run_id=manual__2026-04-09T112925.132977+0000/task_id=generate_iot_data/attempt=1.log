@@ -1,0 +1,30 @@
+[2026-04-09T11:29:30.306+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: smart_building_pipeline_.generate_iot_data manual__2026-04-09T11:29:25.132977+00:00 [queued]>
+[2026-04-09T11:29:30.315+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: smart_building_pipeline_.generate_iot_data manual__2026-04-09T11:29:25.132977+00:00 [queued]>
+[2026-04-09T11:29:30.316+0000] {taskinstance.py:2170} INFO - Starting attempt 1 of 3
+[2026-04-09T11:29:30.336+0000] {taskinstance.py:2191} INFO - Executing <Task(PythonOperator): generate_iot_data> on 2026-04-09 11:29:25.132977+00:00
+[2026-04-09T11:29:30.349+0000] {standard_task_runner.py:60} INFO - Started process 1597 to run task
+[2026-04-09T11:29:30.353+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'smart_building_pipeline_', 'generate_iot_data', 'manual__2026-04-09T11:29:25.132977+00:00', '--job-id', '15', '--raw', '--subdir', 'DAGS_FOLDER/bems_dag.py', '--cfg-path', '/tmp/tmpkr3_5nnw']
+[2026-04-09T11:29:30.356+0000] {standard_task_runner.py:88} INFO - Job 15: Subtask generate_iot_data
+[2026-04-09T11:29:30.421+0000] {task_command.py:423} INFO - Running <TaskInstance: smart_building_pipeline_.generate_iot_data manual__2026-04-09T11:29:25.132977+00:00 [running]> on host d81182cf7fc4
+[2026-04-09T11:29:30.694+0000] {taskinstance.py:2480} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='smart-building' AIRFLOW_CTX_DAG_ID='smart_building_pipeline_' AIRFLOW_CTX_TASK_ID='generate_iot_data' AIRFLOW_CTX_EXECUTION_DATE='2026-04-09T11:29:25.132977+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-04-09T11:29:25.132977+00:00'
+[2026-04-09T11:29:31.498+0000] {logging_mixin.py:188} INFO - [INFO] Sensor data rows: 13068
+[2026-04-09T11:29:31.506+0000] {logging_mixin.py:188} INFO -                            readingID           timestamp roomID           deviceID  value  deviceType
+abc8b0a6-5b0a-4143-9682-6b9d0f8df738 2026-04-01 08:00:00  IT334  IT334_temperature  31.77 temperature
+2ed795bc-9126-4e07-b03f-d07bdea4ce1c 2026-04-01 08:00:00  IT334        IT334_light  34.00       light
+48fdf902-db61-45fd-a1c8-134e5d3025fd 2026-04-01 08:00:00  IT334        IT334_power   0.31       power
+5ec821e1-693a-4f66-a81f-087bfc76ea27 2026-04-01 08:00:00 Lab103 Lab103_temperature  28.75 temperature
+612ba687-1aa5-4f14-af02-ce2c1293a38c 2026-04-01 08:00:00 Lab103       Lab103_light  12.00       light
+6cef50ce-c901-4af5-af0c-72f9dbcbd5ef 2026-04-01 08:00:00 Lab103       Lab103_power   0.42       power
+b8f66164-28f8-4e31-9632-3926224923a4 2026-04-01 08:00:00  IT305  IT305_temperature  29.44 temperature
+46fd9d6e-4cfb-4147-a172-896d82c1e816 2026-04-01 08:00:00  IT305        IT305_light  14.00       light
+7460c46c-40ee-4c62-b364-435e95e63a2d 2026-04-01 08:00:00  IT305        IT305_power   0.27       power
+91e1363a-a299-426c-bbf7-98581241fd10 2026-04-01 08:00:00 Lab212 Lab212_temperature  31.47 temperature
+3419120a-902e-4225-98f2-e36b1d088a5e 2026-04-01 08:00:00 Lab212       Lab212_light  11.00       light
+5fb73e3f-c575-4f49-9df6-94094adc4c7b 2026-04-01 08:00:00 Lab212       Lab212_power   0.44       power
+c8f73394-1918-499a-923b-b4d380d203f5 2026-04-01 08:00:00 Lab212 Lab212_temperature  31.44 temperature
+24f759c0-0295-4930-aa2a-425573785fdb 2026-04-01 08:00:00 Lab212       Lab212_light  22.00       light
+74857f57-5219-402e-bbfd-1f59c1ad856e 2026-04-01 08:00:00 Lab212       Lab212_power   0.46       power
+[2026-04-09T11:29:31.511+0000] {python.py:201} INFO - Done. Returned value was: None
+[2026-04-09T11:29:31.522+0000] {taskinstance.py:1138} INFO - Marking task as SUCCESS. dag_id=smart_building_pipeline_, task_id=generate_iot_data, execution_date=20260409T112925, start_date=20260409T112930, end_date=20260409T112931
+[2026-04-09T11:29:31.572+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2026-04-09T11:29:31.592+0000] {taskinstance.py:3280} INFO - 0 downstream tasks scheduled from follow-on schedule check

@@ -1,0 +1,37 @@
+[2026-01-20T11:04:54.206+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: test_data_pipeline_v1.save_data_into_db manual__2026-01-20T11:04:51.211441+00:00 [queued]>
+[2026-01-20T11:04:54.219+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: test_data_pipeline_v1.save_data_into_db manual__2026-01-20T11:04:51.211441+00:00 [queued]>
+[2026-01-20T11:04:54.220+0000] {taskinstance.py:2170} INFO - Starting attempt 1 of 1
+[2026-01-20T11:04:54.242+0000] {taskinstance.py:2191} INFO - Executing <Task(PythonOperator): save_data_into_db> on 2026-01-20 11:04:51.211441+00:00
+[2026-01-20T11:04:54.252+0000] {standard_task_runner.py:60} INFO - Started process 14932 to run task
+[2026-01-20T11:04:54.257+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'test_data_pipeline_v1', 'save_data_into_db', 'manual__2026-01-20T11:04:51.211441+00:00', '--job-id', '13', '--raw', '--subdir', 'DAGS_FOLDER/test_data_pipeline.py', '--cfg-path', '/tmp/tmpv6ypao3b']
+[2026-01-20T11:04:54.261+0000] {standard_task_runner.py:88} INFO - Job 13: Subtask save_data_into_db
+[2026-01-20T11:04:54.358+0000] {task_command.py:423} INFO - Running <TaskInstance: test_data_pipeline_v1.save_data_into_db manual__2026-01-20T11:04:51.211441+00:00 [running]> on host 19ed441b9bdc
+[2026-01-20T11:04:54.468+0000] {taskinstance.py:2480} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='Your name' AIRFLOW_CTX_DAG_ID='test_data_pipeline_v1' AIRFLOW_CTX_TASK_ID='save_data_into_db' AIRFLOW_CTX_EXECUTION_DATE='2026-01-20T11:04:51.211441+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-01-20T11:04:51.211441+00:00'
+[2026-01-20T11:04:54.490+0000] {base.py:83} INFO - Using connection ID 'postgres_conn' for task execution.
+[2026-01-20T11:04:54.492+0000] {taskinstance.py:2698} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 433, in _execute_task
+    result = execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 199, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 216, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/test_data_pipeline.py", line 23, in save_data_into_db
+    conn = postgres_hook.get_conn()
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/providers/postgres/hooks/postgres.py", line 158, in get_conn
+    self.conn = psycopg2.connect(**conn_args)
+  File "/home/airflow/.local/lib/python3.8/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+[2026-01-20T11:04:54.511+0000] {taskinstance.py:1138} INFO - Marking task as FAILED. dag_id=test_data_pipeline_v1, task_id=save_data_into_db, execution_date=20260120T110451, start_date=20260120T110454, end_date=20260120T110454
+[2026-01-20T11:04:54.527+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 13 for task save_data_into_db (connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+; 14932)
+[2026-01-20T11:04:54.551+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2026-01-20T11:04:54.571+0000] {taskinstance.py:3280} INFO - 0 downstream tasks scheduled from follow-on schedule check

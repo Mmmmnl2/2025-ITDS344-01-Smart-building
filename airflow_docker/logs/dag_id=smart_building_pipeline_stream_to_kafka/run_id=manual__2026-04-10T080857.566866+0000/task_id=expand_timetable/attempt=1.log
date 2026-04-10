@@ -1,0 +1,25 @@
+[2026-04-10T08:09:00.535+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: smart_building_pipeline_stream_to_kafka.expand_timetable manual__2026-04-10T08:08:57.566866+00:00 [queued]>
+[2026-04-10T08:09:00.544+0000] {taskinstance.py:1956} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: smart_building_pipeline_stream_to_kafka.expand_timetable manual__2026-04-10T08:08:57.566866+00:00 [queued]>
+[2026-04-10T08:09:00.545+0000] {taskinstance.py:2170} INFO - Starting attempt 1 of 3
+[2026-04-10T08:09:00.700+0000] {taskinstance.py:2191} INFO - Executing <Task(PythonOperator): expand_timetable> on 2026-04-10 08:08:57.566866+00:00
+[2026-04-10T08:09:00.709+0000] {standard_task_runner.py:60} INFO - Started process 266 to run task
+[2026-04-10T08:09:00.714+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'smart_building_pipeline_stream_to_kafka', 'expand_timetable', 'manual__2026-04-10T08:08:57.566866+00:00', '--job-id', '68', '--raw', '--subdir', 'DAGS_FOLDER/bems_dag.py', '--cfg-path', '/tmp/tmpxblub0ao']
+[2026-04-10T08:09:00.716+0000] {standard_task_runner.py:88} INFO - Job 68: Subtask expand_timetable
+[2026-04-10T08:09:00.812+0000] {task_command.py:423} INFO - Running <TaskInstance: smart_building_pipeline_stream_to_kafka.expand_timetable manual__2026-04-10T08:08:57.566866+00:00 [running]> on host 998af5aaee6c
+[2026-04-10T08:09:00.973+0000] {taskinstance.py:2480} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='smart-building' AIRFLOW_CTX_DAG_ID='smart_building_pipeline_stream_to_kafka' AIRFLOW_CTX_TASK_ID='expand_timetable' AIRFLOW_CTX_EXECUTION_DATE='2026-04-10T08:08:57.566866+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-04-10T08:08:57.566866+00:00'
+[2026-04-10T08:09:01.033+0000] {logging_mixin.py:188} INFO - [INFO] Expanded timetable rows: 36
+[2026-04-10T08:09:01.044+0000] {logging_mixin.py:188} INFO - roomID       date start_time end_time  course
+ IT334 2026-04-01       8:30    10:30 ITDS241
+Lab103 2026-04-01      10:30    12:30 ITDS242
+ IT305 2026-04-01       9:00    12:00 ITDS211
+Lab212 2026-04-01       9:00    11:00 ITDS331
+Lab212 2026-04-01      11:00    13:00 ITDS331
+ IT331 2026-04-02       9:00    11:00 ITDS261
+Lab212 2026-04-02      11:00    13:00 ITDS262
+ IT334 2026-04-02       8:30    10:30 ITDS241
+Lab103 2026-04-02      10:30    12:30 ITDS242
+ IT305 2026-04-02       9:00    11:00 ITDS362
+[2026-04-10T08:09:01.045+0000] {python.py:201} INFO - Done. Returned value was: None
+[2026-04-10T08:09:01.059+0000] {taskinstance.py:1138} INFO - Marking task as SUCCESS. dag_id=smart_building_pipeline_stream_to_kafka, task_id=expand_timetable, execution_date=20260410T080857, start_date=20260410T080900, end_date=20260410T080901
+[2026-04-10T08:09:01.128+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2026-04-10T08:09:01.177+0000] {taskinstance.py:3280} INFO - 0 downstream tasks scheduled from follow-on schedule check

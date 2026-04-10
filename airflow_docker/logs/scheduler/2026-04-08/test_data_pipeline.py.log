@@ -1,0 +1,21 @@
+[2026-04-08T18:13:28.073+0000] {processor.py:161} INFO - Started process (PID=192) to work on /opt/airflow/dags/test_data_pipeline.py
+[2026-04-08T18:13:28.075+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/test_data_pipeline.py for tasks to queue
+[2026-04-08T18:13:28.077+0000] {logging_mixin.py:188} INFO - [2026-04-08T18:13:28.077+0000] {dagbag.py:538} INFO - Filling up the DagBag from /opt/airflow/dags/test_data_pipeline.py
+[2026-04-08T18:13:28.126+0000] {processor.py:840} INFO - DAG(s) 'test_data_pipeline_v3' retrieved from /opt/airflow/dags/test_data_pipeline.py
+[2026-04-08T18:13:28.201+0000] {logging_mixin.py:188} INFO - [2026-04-08T18:13:28.201+0000] {dag.py:3036} INFO - Sync 1 DAGs
+[2026-04-08T18:13:28.250+0000] {logging_mixin.py:188} INFO - [2026-04-08T18:13:28.250+0000] {dag.py:3823} INFO - Setting next_dagrun for test_data_pipeline_v3 to 2026-04-07 00:00:00+00:00, run_after=2026-04-08 00:00:00+00:00
+[2026-04-08T18:13:28.301+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/test_data_pipeline.py took 0.234 seconds
+[2026-04-08T18:13:58.402+0000] {processor.py:161} INFO - Started process (PID=215) to work on /opt/airflow/dags/test_data_pipeline.py
+[2026-04-08T18:13:58.404+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/test_data_pipeline.py for tasks to queue
+[2026-04-08T18:13:58.405+0000] {logging_mixin.py:188} INFO - [2026-04-08T18:13:58.405+0000] {dagbag.py:538} INFO - Filling up the DagBag from /opt/airflow/dags/test_data_pipeline.py
+[2026-04-08T18:13:58.435+0000] {processor.py:840} INFO - DAG(s) 'test_data_pipeline_v3' retrieved from /opt/airflow/dags/test_data_pipeline.py
+[2026-04-08T18:13:58.472+0000] {logging_mixin.py:188} INFO - [2026-04-08T18:13:58.472+0000] {dag.py:3036} INFO - Sync 1 DAGs
+[2026-04-08T18:13:58.501+0000] {logging_mixin.py:188} INFO - [2026-04-08T18:13:58.501+0000] {dag.py:3823} INFO - Setting next_dagrun for test_data_pipeline_v3 to 2026-04-07 00:00:00+00:00, run_after=2026-04-08 00:00:00+00:00
+[2026-04-08T18:13:58.526+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/test_data_pipeline.py took 0.130 seconds
+[2026-04-08T18:14:29.062+0000] {processor.py:161} INFO - Started process (PID=250) to work on /opt/airflow/dags/test_data_pipeline.py
+[2026-04-08T18:14:29.063+0000] {processor.py:830} INFO - Processing file /opt/airflow/dags/test_data_pipeline.py for tasks to queue
+[2026-04-08T18:14:29.064+0000] {logging_mixin.py:188} INFO - [2026-04-08T18:14:29.064+0000] {dagbag.py:538} INFO - Filling up the DagBag from /opt/airflow/dags/test_data_pipeline.py
+[2026-04-08T18:14:29.089+0000] {processor.py:840} INFO - DAG(s) 'test_data_pipeline_v3' retrieved from /opt/airflow/dags/test_data_pipeline.py
+[2026-04-08T18:14:29.122+0000] {logging_mixin.py:188} INFO - [2026-04-08T18:14:29.122+0000] {dag.py:3036} INFO - Sync 1 DAGs
+[2026-04-08T18:14:29.146+0000] {logging_mixin.py:188} INFO - [2026-04-08T18:14:29.146+0000] {dag.py:3823} INFO - Setting next_dagrun for test_data_pipeline_v3 to 2026-04-07 00:00:00+00:00, run_after=2026-04-08 00:00:00+00:00
+[2026-04-08T18:14:29.165+0000] {processor.py:183} INFO - Processing /opt/airflow/dags/test_data_pipeline.py took 0.109 seconds

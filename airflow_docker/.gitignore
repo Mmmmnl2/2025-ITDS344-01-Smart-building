@@ -1,0 +1,25 @@
+# 🐖 Apache Pig Logs
+pig_*.log
+
+# 🌬️ Airflow Logs
+logs/
+airflow-*.err
+airflow-*.out
+airflow-*.pid
+
+# 📦 Data & Temporary Files
+data/archive/
+data/silver/
+data/bronze/
+raw_sensor_data.csv
+
+# 🐍 Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# 📂 OS Files
+.DS_Store
+Thumbs.db

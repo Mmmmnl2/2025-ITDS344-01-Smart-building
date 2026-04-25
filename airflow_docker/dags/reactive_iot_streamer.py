@@ -9,7 +9,7 @@ from datetime import datetime
 
 # CONFIG
 KAFKA_BROKER = "100.110.59.93:9092"
-TOPIC_BOOKING = 'room_booking'
+TOPIC_BOOKING = 'room-booking'
 TOPIC_IOT = 'iot-sensor'
 CSV_PATH = "/opt/airflow/data/bronze/raw_sensor_data.csv"
 TIMETABLE_PATH = "/opt/airflow/data/timetable.csv"
@@ -17,16 +17,14 @@ TIMETABLE_PATH = "/opt/airflow/data/timetable.csv"
 def start_iot_stream():
     producer = KafkaProducer(
         bootstrap_servers=KAFKA_BROKER,
-        value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-        api_version=(0, 10, 1)
+        value_serializer=lambda v: json.dumps(v).encode('utf-8')
     )
     consumer = KafkaConsumer(
         TOPIC_BOOKING,
         bootstrap_servers=KAFKA_BROKER,
         value_deserializer=lambda m: json.loads(m.decode('utf-8')),
         auto_offset_reset='latest',
-        enable_auto_commit=True,
-        api_version=(0, 10, 1)
+        enable_auto_commit=True
     )
 
     df_raw = pd.read_csv(TIMETABLE_PATH)

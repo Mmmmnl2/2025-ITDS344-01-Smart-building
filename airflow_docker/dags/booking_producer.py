@@ -6,7 +6,7 @@ from datetime import datetime
 from kafka import KafkaProducer
 
 KAFKA_BROKER = "100.110.59.93:9092"
-TOPIC_NAME = "room_booking"
+TOPIC_NAME = "room-booking"
 TIMETABLE_PATH = "/opt/airflow/data/timetable.csv"
 
 def generate_booking():
@@ -26,8 +26,7 @@ def generate_booking():
 
 producer = KafkaProducer(
     bootstrap_servers=KAFKA_BROKER,
-    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-    api_version=(0, 10, 1) # Force API version if broker doesn't advertise properly
+    value_serializer=lambda v: json.dumps(v).encode('utf-8')
 )
 
 print("📖 เริ่มจำลองการจองห้อง...")

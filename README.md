@@ -17,7 +17,7 @@ docker exec -it airflow_docker-airflow-webserver-1 bash
 python /opt/airflow/dags/reactive_iot_streamer.py
 ```
 
-### 2. วิธีเปิดการสร้างข้อมูล room_booking (Kafka Event)
+### 2. วิธีเปิดการสร้างข้อมูล room-booking (Kafka Event)
 เข้าไปที่ shell ของ Airflow webserver container:
 ```bash
 docker exec -it airflow_docker-airflow-webserver-1 bash

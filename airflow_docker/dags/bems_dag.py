@@ -28,6 +28,14 @@ with DAG(
 ) as dag:
 
     with TaskGroup("bronze_layer") as bronze:
+        t_transfer_timetable = SFTPOperator(
+            task_id="sync_timetable_file",
+            ssh_conn_id="linux_server_connection",
+            local_filepath=f"{BASE_PATH}/timetable.csv",
+            remote_filepath="/home/kanyanat/timetable.csv",
+            operation="put"
+        )
+
         t_transfer = SFTPOperator(
             task_id="sync_streaming_file",
             ssh_conn_id="linux_server_connection",
@@ -36,42 +44,44 @@ with DAG(
             operation="put"
         )
 
+        t_transfer_timetable >> t_transfer
+
     with TaskGroup("processing") as processing:
         t_pig_etl = SSHOperator(
             task_id="run_pig_and_archive",
             ssh_conn_id="linux_server_connection",
             command=dedent(f"""
-                    export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
-                    export HADOOP_HOME=/usr/local/hadoop
-                    export PIG_HOME=/usr/local/pig
-                    export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$PIG_HOME/bin
+                export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+                export HADOOP_HOME=/usr/local/hadoop
+                export PIG_HOME=/usr/local/pig
+                export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$PIG_HOME/bin
 
-                    # 🔹 1. เช็คก่อนว่าไฟล์มาถึง Linux จริงไหม
-                    if [ ! -f /home/kanyanat/raw_sensor_data.csv ]; then
-                        echo "❌ ERROR: ข้อมูลดิบยังไม่มาถึง!"
-                        exit 1
-                    fi
+                export COMMONS_JAR="/usr/local/pig/lib/hadoop3-runtime/commons-collections-3.2.2.jar"
+                export PIG_CLASSPATH=$PIG_CLASSPATH:$COMMONS_JAR
 
-                    # 🔹 2. ล้าง Folder Output เก่า
-                    rm -rf /home/kanyanat/data/silver_output /home/kanyanat/data/gold_output
+                if [ ! -f /home/kanyanat/raw_sensor_data.csv ] || [ ! -f /home/kanyanat/timetable.csv ]; then
+                    echo "❌ ERROR: ไฟล์ Input หายไป!"
+                    exit 1
+                fi
 
-                    # 🔹 3. รัน Pig
-                    $PIG_HOME/bin/pig -x local /home/kanyanat/scripts/process_iot.pig
+                rm -rf /home/kanyanat/data/silver_output /home/kanyanat/data/gold_output
 
-                    # เช็คว่า Pig รันสำเร็จไหมก่อนไปต่อ
-                    if [ $? -eq 0 ]; then
-                        # 🔹 4. เอาข้อมูลดิบไปต่อท้ายใน Data Lake (HDFS)
-                        $HADOOP_HOME/bin/hdfs dfs -mkdir -p /user/kanyanat/bronze/
-                        $HADOOP_HOME/bin/hdfs dfs -appendToFile /home/kanyanat/raw_sensor_data.csv /user/kanyanat/bronze/all_history_data.csv
+                rm -f pig_*.log
 
-                        # 🔹 5. ใช้เสร็จแล้วลบไฟล์ทิ้ง (เฉพาะไฟล์บน Linux)
-                        rm -f /home/kanyanat/raw_sensor_data.csv
-                        echo "✅ ประมวลผลและเก็บเข้า Data Lake สำเร็จ!"
-                    else
-                        echo "❌ Pig รันไม่ผ่าน เช็ค Log ใน pig_*.log"
-                        exit 1
-                    fi
-                """),
+                # ลบ flag -file และเพิ่มการพิมพ์ Log Pig ให้ออกจอ
+                $PIG_HOME/bin/pig -x local -f /home/kanyanat/scripts/process_iot.pig
+
+                if [ $? -eq 0 ]; then
+                    $HADOOP_HOME/bin/hdfs dfs -mkdir -p /user/kanyanat/bronze/
+                    $HADOOP_HOME/bin/hdfs dfs -appendToFile /home/kanyanat/raw_sensor_data.csv /user/kanyanat/bronze/all_history_data.csv
+                    rm -f /home/kanyanat/raw_sensor_data.csv
+                    echo "✅ ประมวลผลสำเร็จ!"
+                else
+                    echo "❌ Pig รันไม่ผ่าน! นี่คือ Log ล่าสุด:"
+                    cat pig_*.log || echo "ไม่พบไฟล์ log"
+                    exit 1
+                fi
+            """)
         )
 
     with TaskGroup("serving_layer_mongo") as serving:
@@ -79,13 +89,19 @@ with DAG(
             task_id="load_to_mongodb",
             ssh_conn_id="linux_server_connection",
             command=dedent(f"""
-                mongoimport --db smart_building \
-                            --collection fact_iot_readings \
-                            --type csv \
-                            --fields roomid,devicetype,avg_value,max_value,load_date \
-                            --file {REMOTE_DATA}/gold_output/part-r-00000 \
-                            --mode merge \
-                            --upsertFields roomid,devicetype
+                # เช็คว่ามีไฟล์ gold_output ออกมาจริงไหมก่อน Import
+                if [ -d /home/kanyanat/data/gold_output ]; then
+                    mongoimport --db smart_building \
+                                --collection fact_iot_readings \
+                                --type csv \
+                                --fields roomid,devicetype,avg_value,max_value,load_date \
+                                --file $(ls /home/kanyanat/data/gold_output/part-*) \
+                                --mode merge \
+                                --upsertFields roomid,devicetype
+                else
+                    echo "❌ ERROR: ไม่พบไฟล์ Gold Output สำหรับ Import เข้า MongoDB"
+                    exit 1
+                fi
             """),
         )
 

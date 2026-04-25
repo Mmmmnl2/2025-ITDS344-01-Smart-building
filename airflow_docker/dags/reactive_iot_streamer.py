@@ -64,7 +64,7 @@ def start_iot_stream():
             for b in booking_overrides.get((room, current_date), []):
                 if b['start'] <= current_time <= b['end']: occupied = True; break
 
-            # ปรับช่วงค่าให้เหวี่ยงสะใจอาจารย์
+            # ปรับช่วงค่าให้เหวี่ยง
             sensors = {
                 'temperature': (22 + weather_drift, 25 + weather_drift) if occupied else (28 + time_factor, 32 + time_factor),
                 'light': (500, 900) if occupied else (0, 80),

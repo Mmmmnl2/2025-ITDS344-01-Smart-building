@@ -26,3 +26,19 @@ docker exec -it airflow_docker-airflow-webserver-1 bash
 ```bash
 python /opt/airflow/dags/booking_producer.py
 ```
+
+### 3. วิธีเปิด dashboard (streamlit)
+**วิธี setup สามารถดูได้ใน:**
+**ใน ssh ของกลุ่ม**
+1. รันเว็บไซต์ใน ssh
+  ```
+  cd ~/Smart-building/dashboard
+  source venv/bin/activate
+  
+  streamlit run your_app.py --server.address 127.0.0.1
+  ```
+2. เปิด Tunnel ssh เพื่อเชื่อมต่อ (แก้ปัญหา tailscale) **รันใน terminal ใหม่**
+  ```
+  ssh -L 8501:localhost:8501 kanyanat@100.110.59.93
+  ```
+3. เข้าถึงผ่าน `http://localhost:8501/`

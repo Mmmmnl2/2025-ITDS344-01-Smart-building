@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_autorefresh import st_autorefresh
 from pymongo import MongoClient
 import pandas as pd
 import plotly.express as px
@@ -32,8 +33,8 @@ refresh_rate = st.sidebar.slider(
     2, 30, 5
 )
 
-# 🔁 AUTO REFRESH (replaces while loop)
-st.autorefresh(interval=refresh_rate * 1000, key="auto_refresh")
+# 🔁 AUTO REFRESH (non-blocking)
+st_autorefresh(interval=refresh_rate * 1000, key="auto_refresh")
 
 # --- LOAD DATA ---
 cursor = list(collection.find({}))
@@ -44,7 +45,7 @@ if cursor:
     df = pd.DataFrame(cursor)
     df['load_date'] = pd.to_datetime(df['load_date'])
 
-    # Optional sanity filter
+    # sanity filter
     df = df[df['avg_value'] < 1000]
 
     # --- ROOM FILTER ---
@@ -110,7 +111,7 @@ if cursor:
     st.divider()
 
     # =========================
-    # 🔥 HEATMAP (ONLY ALL ROOMS)
+    # 🔥 HEATMAP (ONLY ALL)
     # =========================
     if selected_room == "All":
         st.subheader(f"🔥 Heatmap: {selected_metric}")
@@ -154,7 +155,7 @@ if cursor:
     st.divider()
 
     # =========================
-    # 🏆 ROOM RANKING (ONLY ALL)
+    # 🏆 RANKING (ONLY ALL)
     # =========================
     if selected_room == "All":
         st.subheader(f"🏆 Room Ranking: {selected_metric}")
@@ -178,7 +179,7 @@ if cursor:
 
             st.plotly_chart(fig_rank, width='stretch')
 
-    
+
     # =========================
     # 📋 SNAPSHOT TABLE
     # =========================
@@ -199,7 +200,7 @@ if cursor:
     st.dataframe(snapshot_view, width='stretch')
 
     st.divider()
-
+    
     # =========================
     # FOOTER
     # =========================

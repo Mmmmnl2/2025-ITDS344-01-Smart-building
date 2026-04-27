@@ -8,9 +8,9 @@ cleaned_sensor = FILTER raw_sensor BY
     value IS NOT NULL AND
     (
         (deviceType == 'temperature' AND value < 60) OR   -- อุณหภูมิห้ามเกิน 60 (เผื่อเซนเซอร์ตากแดด)
-        (deviceType == 'power' AND value < 400) OR       -- พลังงานห้ามเกิน 400
-        (deviceType == 'co2' AND value < 2000) OR        -- CO2 ห้ามเกิน 2000 ppm
-        (deviceType == 'humidity' AND value <= 100)      -- ความชื้นห้ามเกิน 100%
+        (deviceType == 'power' AND value >= 0 AND value < 100) OR       -- พลังงานห้ามเกิน 100kW
+        (deviceType == 'co2' AND value >= 0 AND value < 2000) OR        -- CO2 ห้ามเกิน 2000 ppm
+        (deviceType == 'humidity' AND value >= 0 AND value <= 100)      -- ความชื้นห้ามเกิน 100%
     );
 
 -- 🔹 เพิ่มจุดนี้: STORE Silver Layer ไว้ใช้งานและทำ Report

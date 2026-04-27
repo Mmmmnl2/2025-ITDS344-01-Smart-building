@@ -2,11 +2,11 @@ import json
 import time
 import random
 import pandas as pd
-from datetime import datetime, timedelta # <--- เพิ่ม timedelta
+from datetime import datetime, timedelta
 from kafka import KafkaProducer
 
 KAFKA_BROKER = "100.110.59.93:9092"
-TOPIC_NAME = "room-booking" # (เช็คชื่อ Topic ให้ตรงกับฝั่ง Consumer ด้วยนะครับ)
+TOPIC_NAME = "room-booking"
 TIMETABLE_PATH = "/opt/airflow/data/timetable.csv"
 
 def generate_booking():
@@ -34,15 +34,17 @@ def generate_booking():
 
 producer = KafkaProducer(
     bootstrap_servers=KAFKA_BROKER,
-    value_serializer=lambda v: json.dumps(v).encode('utf-8')
+    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+#     api_version=(0, 10, 1),
+    max_block_ms=5000
 )
 
 print("📖 เริ่มจำลองการจองห้อง...")
 try:
     while True:
         data = generate_booking()
-        producer.send(TOPIC_NAME, data)
-        # ปรับเวลาแสดงผลนิดหน่อยให้ดูชัดเจน
+        future = producer.send(TOPIC_NAME, data)
+        result = future.get(timeout=10)        # ปรับเวลาแสดงผลนิดหน่อยให้ดูชัดเจน
         print(f"✅ จองห้อง {data['room']} | วันที่: {data['date']} | เวลา: {data['time_start']} - {data['time_end']}")
         time.sleep(random.randint(20, 60))
 except KeyboardInterrupt:

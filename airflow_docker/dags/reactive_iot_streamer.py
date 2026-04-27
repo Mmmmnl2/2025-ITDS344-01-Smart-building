@@ -17,14 +17,16 @@ TIMETABLE_PATH = "/opt/airflow/data/timetable.csv"
 def start_iot_stream():
     producer = KafkaProducer(
         bootstrap_servers=KAFKA_BROKER,
-        value_serializer=lambda v: json.dumps(v).encode('utf-8')
+        value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+#         api_version=(0, 10, 1)
     )
     consumer = KafkaConsumer(
         TOPIC_BOOKING,
         bootstrap_servers=KAFKA_BROKER,
         value_deserializer=lambda m: json.loads(m.decode('utf-8')),
         auto_offset_reset='latest',
-        enable_auto_commit=True
+        enable_auto_commit=True,
+#         api_version=(0, 10, 1)
     )
 
     df_raw = pd.read_csv(TIMETABLE_PATH)
@@ -64,11 +66,10 @@ def start_iot_stream():
             for b in booking_overrides.get((room, current_date), []):
                 if b['start'] <= current_time <= b['end']: occupied = True; break
 
-            # ปรับช่วงค่าให้เหวี่ยง
             sensors = {
                 'temperature': (22 + weather_drift, 25 + weather_drift) if occupied else (28 + time_factor, 32 + time_factor),
                 'light': (500, 900) if occupied else (0, 80),
-                'power': (3.0, 6.0) if occupied else (0.1, 0.5),
+                'power': (10.0, 50.0) if occupied else (0.1, 0.8),
                 'humidity': (40, 55) if occupied else (65, 85),
                 'co2': (600, 1000) if occupied else (300, 450)
             }
@@ -77,10 +78,16 @@ def start_iot_stream():
                 r = random.random()
                 if r < 0.05: # 5% เป็นค่าว่าง
                     val = None
-                elif r < 0.10: # 10% เป็นค่าพุ่ง (Outlier)
-                    val = round(random.uniform(500, 1000), 2)
+                elif r < 0.10: # 10% เป็นค่าพุ่ง (Extreme Outliers)
+                    if d_type == 'power':
+                        val = round(random.uniform(110, 300), 2)  # พุ่งเกิน 100 เพื่อเช็คกฎ
+                    elif d_type == 'co2':
+                        val = round(random.uniform(2500, 5000), 2)
+                    elif d_type == 'temperature':
+                        val = round(random.uniform(150, 500), 2)
+                    else:
+                        val = round(random.uniform(500, 1000), 2)
                 else:
-                    # ใส่ Gauss Noise ให้เลขขยับยิกๆ
                     val = round(random.uniform(low, high) + random.gauss(0, 0.5), 2)
 
                 iot_event = {

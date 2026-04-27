@@ -20,7 +20,7 @@ default_args = {
 }
 
 with DAG(
-    'bems_medallion_pipeline_v4',
+    'bems_medallion_pipeline_v6',
     default_args=default_args,
     start_date=datetime(2026, 4, 1),
     schedule_interval=timedelta(minutes=5),
@@ -89,20 +89,75 @@ with DAG(
             task_id="load_to_mongodb",
             ssh_conn_id="linux_server_connection",
             command=dedent(f"""
-                # เช็คว่ามีไฟล์ gold_output ออกมาจริงไหมก่อน Import
-                if [ -d /home/kanyanat/data/gold_output ]; then
+                # 1. เช็คว่ามีไฟล์ gold_output ออกมาจริงไหม
+                if ls /home/kanyanat/data/gold_output/part-* 1> /dev/null 2>&1; then
+
+                    # 2. Import ข้อมูลรอบใหม่เข้า MongoDB (ใช้โหมดปกติเพื่อสะสมประวัติ)
                     mongoimport --db smart_building \
-                                --collection fact_iot_readings \
-                                --type csv \
-                                --fields roomid,devicetype,avg_value,max_value,load_date \
-                                --file $(ls /home/kanyanat/data/gold_output/part-*) \
-                                --mode merge \
-                                --upsertFields roomid,devicetype
+                               --collection fact_iot_readings \
+                               --type csv \
+                               --fields roomid,devicetype,occupied,avg_value,max_value,load_date \
+                               --file $(ls /home/kanyanat/data/gold_output/part-*)
+
+                    # 3. รัน Data Retention Policy (เก็บแค่ 3 load_date ล่าสุด)
+                    mongosh smart_building --eval '
+                        const latestDates = db.fact_iot_readings.distinct("load_date").sort().reverse().slice(0, 3);
+                        const result = db.fact_iot_readings.deleteMany({{ load_date: {{ $nin: latestDates }} }});
+                        print("✅ Retention Complete: Deleted " + result.deletedCount + " old records.");
+                    '
                 else
-                    echo "❌ ERROR: ไม่พบไฟล์ Gold Output สำหรับ Import เข้า MongoDB"
+                    echo "❌ ERROR: ไม่พบไฟล์ Gold Output ใน /home/kanyanat/data/gold_output/"
                     exit 1
                 fi
             """),
         )
 
-    bronze >> processing >> serving
+    with TaskGroup("testing") as testing:
+        t_validate_e2e = SSHOperator(
+            task_id="validate_e2e_results",
+            ssh_conn_id="linux_server_connection",
+            command=dedent("""
+                echo "🚀 Starting Comprehensive End-to-End Validation..."
+                DB_NAME="smart_building"
+                COLLECTION="fact_iot_readings"
+
+                # --- 1. Integrity Check ---
+                HEADER_COUNT=$(mongosh $DB_NAME --quiet --eval "db.$COLLECTION.countDocuments({ roomid: 'readingID' })")
+
+                NULL_COUNT=$(mongosh $DB_NAME --quiet --eval "db.$COLLECTION.countDocuments({
+                    \$or: [
+                        { roomid: null },
+                        { devicetype: null },
+                        { avg_value: null }
+                    ]
+                })")
+
+                # --- 2. Logic Check ---
+                OUTLIER_LEAK=$(mongosh $DB_NAME --quiet --eval "db.$COLLECTION.countDocuments({
+                    \$or: [
+                        { devicetype: 'temperature', avg_value: { \$gt: 60 } },
+                        { devicetype: 'power', avg_value: { \$gte: 100 } },
+                        { devicetype: 'power', avg_value: { \$lt: 0 } },
+                        { devicetype: 'co2', avg_value: { \$gte: 2000 } },
+                        { devicetype: 'humidity', avg_value: { \$gt: 100 } }
+                    ]
+                })")
+
+                # --- 3. สรุปผล (ลบ \ หน้าตัวแปรออกให้หมด) ---
+                TOTAL_ERRORS=$((HEADER_COUNT + NULL_COUNT + OUTLIER_LEAK))
+
+                echo "📊 Validation Summary:"
+                echo "   - Header Records Found: $HEADER_COUNT"
+                echo "   - Null Records Found:   $NULL_COUNT"
+                echo "   - Outlier Records Found: $OUTLIER_LEAK"
+
+                if [ "$TOTAL_ERRORS" -eq 0 ]; then
+                    echo "✅ SUCCESS: All E2E Data Quality Rules Passed!"
+                else
+                    echo "❌ FAIL: Data Integrity Issues Detected! (Total Errors: $TOTAL_ERRORS)"
+                    exit 1
+                fi
+            """),
+        )
+
+    bronze >> processing >> serving >> testing

@@ -33,7 +33,7 @@ refresh_rate = st.sidebar.slider(
     2, 30, 5
 )
 
-# 🔁 AUTO REFRESH (non-blocking)
+# 🔁 AUTO REFRESH
 st_autorefresh(interval=refresh_rate * 1000, key="auto_refresh")
 
 # --- LOAD DATA ---
@@ -64,20 +64,32 @@ if cursor:
         filtered_df = filtered_df[filtered_df['roomid'] == selected_room]
 
     # =========================
-    # KPI CARDS
+    # KPI CARDS (CONTEXT-AWARE)
     # =========================
     st.subheader("📊 Key Metrics")
 
     col1, col2, col3, col4 = st.columns(4)
 
+    kpi_df = df if selected_room == "All" else df[df['roomid'] == selected_room]
+
     def safe_avg(dtype):
-        vals = df[df['devicetype'] == dtype]['avg_value']
+        vals = kpi_df[kpi_df['devicetype'] == dtype]['avg_value']
         return vals.mean() if not vals.empty else 0
 
-    col1.metric("🌡 Avg Temp", f"{safe_avg('temperature'):.1f} °C")
-    col2.metric("💨 Avg CO2", f"{safe_avg('co2'):.0f} ppm")
-    col3.metric("⚡ Total Power", f"{df[df['devicetype']=='power']['avg_value'].sum():.2f}")
-    col4.metric("🏢 Rooms", df['roomid'].nunique())
+    room_label = "All Rooms" if selected_room == "All" else f"Room {selected_room}"
+
+    col1.metric(f"🌡 Avg Temp ({room_label})", f"{safe_avg('temperature'):.1f} °C")
+    col2.metric(f"💨 Avg CO2 ({room_label})", f"{safe_avg('co2'):.0f} ppm")
+    col3.metric(
+        f"⚡ Total Power ({room_label})",
+        f"{kpi_df[kpi_df['devicetype']=='power']['avg_value'].sum():.2f}"
+    )
+
+    # Dynamic last KPI
+    if selected_room == "All":
+        col4.metric("🏢 Rooms", df['roomid'].nunique())
+    else:
+        col4.metric("📍 Selected Room", selected_room)
 
     st.divider()
 
@@ -87,7 +99,7 @@ if cursor:
     st.subheader("🚨 Alerts")
 
     thresholds = {
-        "temperature": 30,
+        "temperature": 35,
         "co2": 1000,
         "power": 500,
         "humidity": 70
@@ -179,11 +191,12 @@ if cursor:
 
             st.plotly_chart(fig_rank, width='stretch')
 
+        st.divider()
 
     # =========================
     # 📋 SNAPSHOT TABLE
     # =========================
-    st.subheader("📋 Latest Snapshot per Room")
+    st.subheader("📋 Current State by Room")
 
     latest_df = (
         df.sort_values("load_date")
@@ -200,7 +213,7 @@ if cursor:
     st.dataframe(snapshot_view, width='stretch')
 
     st.divider()
-    
+
     # =========================
     # FOOTER
     # =========================

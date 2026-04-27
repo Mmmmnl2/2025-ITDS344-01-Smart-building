@@ -28,7 +28,8 @@ python /opt/airflow/dags/booking_producer.py
 ```
 
 ### 3. วิธีเปิด dashboard (streamlit)
-**วิธี setup สามารถดูได้ใน:**
+**วิธี setup สามารถดูได้ใน:** [dashboard_readme.md](dashboard/dashboard_readme.md)
+<br>
 **ใน ssh ของกลุ่ม**
 1. รันเว็บไซต์ใน ssh
   ```

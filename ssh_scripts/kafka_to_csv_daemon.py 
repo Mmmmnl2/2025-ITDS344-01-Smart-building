@@ -1,0 +1,41 @@
+import json
+import os
+from kafka import KafkaConsumer
+
+# CONFIG
+KAFKA_BROKER = '100.110.59.93:9092'
+BRONZE_DIR = "/home/kanyanat/data/bronze"
+IOT_FILE = f"{BRONZE_DIR}/incoming_iot.csv"
+BOOK_FILE = f"{BRONZE_DIR}/incoming_booking.csv"
+
+# สร้าง Directory ถ้ายังไม่มี
+os.makedirs(BRONZE_DIR, exist_ok=True)
+
+# 🔹 แก้จาก value_deserial_serializer เป็น value_deserializer
+consumer = KafkaConsumer(
+    bootstrap_servers=[KAFKA_BROKER],
+    value_deserializer=lambda m: json.loads(m.decode('utf-8')), # แก้ตรงนี้ครับ
+    auto_offset_reset='earliest',
+    group_id='linux_daemon_collector'
+)
+consumer.subscribe(['iot-sensor', 'room-booking'])
+
+print("🚀 Daemon is running and waiting for Kafka messages...")
+
+for msg in consumer:
+    data = msg.value
+    try:
+        if msg.topic == 'iot-sensor':
+            # Format: readingID, timestamp, roomID, deviceID, value, deviceType
+            line = f"{data['readingID']},{data['timestamp']},{data['roomID']},{data['deviceID']},{data['value']},{data['deviceType']}\n"
+            with open(IOT_FILE, "a") as f: f.write(line)
+            print(f"📥 Saved IoT: {data['readingID']}")
+
+        elif msg.topic == 'room-booking':
+            # Format: room, date, time_start, time_end, booking_id
+            line = f"{data['room']},{data['date']},{data['time_start']},{data['time_end']},{data['booking_id']}\n"
+            with open(BOOK_FILE, "a") as f: f.write(line)
+            print(f"📥 Saved Booking: {data['booking_id']}")
+
+    except Exception as e:
+        print(f"⚠️ Error processing message: {e}")

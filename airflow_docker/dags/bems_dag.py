@@ -12,6 +12,7 @@ BASE_PATH = "/opt/airflow/data"
 BRONZE_PATH = f"{BASE_PATH}/bronze"
 REMOTE_SCRIPTS = "/home/kanyanat/scripts"
 REMOTE_DATA = "/home/kanyanat/data"
+REMOTE_BRONZE = f"{REMOTE_DATA}/bronze"
 
 default_args = {
     'owner': 'smart-building',
@@ -32,23 +33,29 @@ with DAG(
             task_id="sync_timetable_file",
             ssh_conn_id="linux_server_connection",
             local_filepath=f"{BASE_PATH}/timetable.csv",
-            remote_filepath="/home/kanyanat/timetable.csv",
+            remote_filepath=f"{REMOTE_BRONZE}/timetable.csv",
             operation="put"
         )
-
-        t_transfer = SFTPOperator(
-            task_id="sync_streaming_file",
-            ssh_conn_id="linux_server_connection",
-            local_filepath=f"{BRONZE_PATH}/raw_sensor_data.csv",
-            remote_filepath="/home/kanyanat/raw_sensor_data.csv",
-            operation="put"
-        )
-
-        t_transfer_timetable >> t_transfer
 
     with TaskGroup("processing") as processing:
+
+        t_prepare_files = SSHOperator(
+            task_id="prepare_micro_batch",
+            ssh_conn_id="linux_server_connection",
+            command=dedent(f"""
+                mkdir -p {REMOTE_BRONZE}
+                # สร้างไฟล์ว่างกัน Error mv
+                touch {REMOTE_BRONZE}/incoming_iot.csv {REMOTE_BRONZE}/incoming_booking.csv
+                # หมุนไฟล์ (Rotation)
+                mv {REMOTE_BRONZE}/incoming_iot.csv {REMOTE_BRONZE}/processing_iot.csv
+                mv {REMOTE_BRONZE}/incoming_booking.csv {REMOTE_BRONZE}/processing_booking.csv
+                # สร้างไฟล์ใหม่รับ Streaming ทันที
+                touch {REMOTE_BRONZE}/incoming_iot.csv {REMOTE_BRONZE}/incoming_booking.csv
+            """)
+        )
+
         t_pig_etl = SSHOperator(
-            task_id="run_pig_and_archive",
+            task_id="run_pig_decision_engine",
             ssh_conn_id="linux_server_connection",
             command=dedent(f"""
                 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
@@ -57,32 +64,27 @@ with DAG(
                 export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$PIG_HOME/bin
 
                 export COMMONS_JAR="/usr/local/pig/lib/hadoop3-runtime/commons-collections-3.2.2.jar"
-                export PIG_CLASSPATH=$PIG_CLASSPATH:$COMMONS_JAR
+                export PIG_CLASSPATH=$(hadoop classpath):$COMMONS_JAR
 
-                if [ ! -f /home/kanyanat/raw_sensor_data.csv ] || [ ! -f /home/kanyanat/timetable.csv ]; then
-                    echo "❌ ERROR: ไฟล์ Input หายไป!"
-                    exit 1
-                fi
+                # ล้าง Output เก่า
+                rm -rf {REMOTE_DATA}/silver_output {REMOTE_DATA}/gold_output
 
-                rm -rf /home/kanyanat/data/silver_output /home/kanyanat/data/gold_output
-
-                rm -f pig_*.log
-
-                # ลบ flag -file และเพิ่มการพิมพ์ Log Pig ให้ออกจอ
-                $PIG_HOME/bin/pig -x local -f /home/kanyanat/scripts/process_iot.pig
+                # รัน Pig Pipeline
+                pig -x local -f {REMOTE_SCRIPTS}/process_iot.pig
 
                 if [ $? -eq 0 ]; then
-                    $HADOOP_HOME/bin/hdfs dfs -mkdir -p /user/kanyanat/bronze/
-                    $HADOOP_HOME/bin/hdfs dfs -appendToFile /home/kanyanat/raw_sensor_data.csv /user/kanyanat/bronze/all_history_data.csv
-                    rm -f /home/kanyanat/raw_sensor_data.csv
-                    echo "✅ ประมวลผลสำเร็จ!"
+                    echo "✅ Pig Success!"
+                    # เก็บ Archive และล้างไฟล์รอบนี้
+                    cat {REMOTE_BRONZE}/processing_iot.csv >> {REMOTE_BRONZE}/history_iot_all.csv
+                    rm -f {REMOTE_BRONZE}/processing_iot.csv {REMOTE_BRONZE}/processing_booking.csv
                 else
-                    echo "❌ Pig รันไม่ผ่าน! นี่คือ Log ล่าสุด:"
-                    cat pig_*.log || echo "ไม่พบไฟล์ log"
+                    echo "❌ Pig Failed!"
                     exit 1
                 fi
             """)
         )
+
+        t_prepare_files >> t_pig_etl
 
     with TaskGroup("serving_layer_mongo") as serving:
         t_mongo_load = SSHOperator(
@@ -92,11 +94,13 @@ with DAG(
                 # 1. เช็คว่ามีไฟล์ gold_output ออกมาจริงไหม
                 if ls /home/kanyanat/data/gold_output/part-* 1> /dev/null 2>&1; then
 
-                    # 2. Import ข้อมูลรอบใหม่เข้า MongoDB (ใช้โหมดปกติเพื่อสะสมประวัติ)
+                    # 2. Import ข้อมูลรอบใหม่เข้า MongoDB
                     mongoimport --db smart_building \
                                --collection fact_iot_readings \
                                --type csv \
                                --fields roomid,devicetype,occupied,avg_value,max_value,load_date \
+                               --mode merge \
+                               --upsertFields roomid,devicetype,load_date \
                                --file $(ls /home/kanyanat/data/gold_output/part-*)
 
                     # 3. รัน Data Retention Policy (เก็บแค่ 3 load_date ล่าสุด)
